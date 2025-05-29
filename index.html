@@ -2,102 +2,80 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Tarjeta AR Video</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarjeta AR con vídeo</title>
 
   <!-- A-Frame + AR.js -->
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-    }
-    a-scene {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-    }
-    /* Ocultamos solo el elemento <video> de assets */
-    video#myVideoAsset {
-      display: none;
-    }
+    html,body{margin:0;height:100%;overflow:hidden}
+    a-scene{position:absolute;top:0;left:0;width:100%;height:100%}
+    video#myVideoAsset{display:none}
   </style>
 </head>
 <body>
 
-  <a-scene
-    embedded
-    vr-mode-ui="enabled: false"
-    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-  >
-    <!-- 1) Pre-carga forzada del vídeo -->
-    <a-assets>
-      <video
-        id="myVideoAsset"
-        src="assets/video.mp4"
-        autoplay          <!-- inicia descarga automática -->
-        preload="auto"
-        loop
-        muted
-        playsinline
-        webkit-playsinline
-        crossorigin="anonymous"
-      ></video>
-    </a-assets>
+<a-scene
+  embedded
+  vr-mode-ui="enabled:false"
+  arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled:true;"
+>
+  <!-- 1) Vídeo SIN autoplay -->
+  <a-assets>
+    <video id="myVideoAsset"
+           src="assets/video.mp4"
+           preload="auto"
+           loop
+           muted
+           playsinline
+           webkit-playsinline
+           crossorigin="anonymous">
+    </video>
+  </a-assets>
 
-    <!-- 2) Definimos el marcador .patt -->
-    <a-marker
-      id="myMarker"
-      type="pattern"
-      url="assets/tu-marcador.patt"
-      smooth="true"
-      smoothCount="10"
-      smoothTolerance="0.01"
-      smoothThreshold="5"
-    >
-      <!-- 3) Plano A-Frame que proyecta el vídeo -->
-      <a-video
-        id="markerVideo"
-        src="#myVideoAsset"
-        width="1.6"
-        height="0.9"
-        position="0 0 0"
-        rotation="-90 0 0"
-        autoplay
-        loop
-        playsinline
-        webkit-playsinline
-      ></a-video>
-    </a-marker>
+  <!-- 2) Marcador patrón -->
+  <a-marker id="myMarker"
+            type="pattern"
+            url="assets/tu-marcador.patt"
+            smooth="true" smoothCount="10"
+            smoothTolerance="0.01" smoothThreshold="5">
 
-    <!-- 4) Cámara para AR.js -->
-    <a-entity camera></a-entity>
-  </a-scene>
+    <!-- 3) Plano con el vídeo; tampoco autoplay -->
+    <a-video src="#myVideoAsset"
+             width="1.6" height="0.9"
+             position="0 0 0"
+             rotation="-90 0 0"
+             loop
+             playsinline
+             webkit-playsinline
+             muted>
+    </a-video>
+  </a-marker>
 
-  <script>
-    window.onload = () => {
-      // Forzamos la carga del asset de vídeo en cuanto abra la página
-      const vid = document.getElementById('myVideoAsset');
-      if (vid) vid.load();
+  <a-entity camera></a-entity>
+</a-scene>
 
-      // Configuramos play/pause al detectar el marcador
-      const marker = document.getElementById('myMarker');
-      if (!marker || !vid) return;
+<script>
+window.onload = () => {
+  const marker = document.querySelector('#myMarker');
+  const vid    = document.querySelector('#myVideoAsset');
 
-      marker.addEventListener('markerFound', () => {
-        console.log('Marcador encontrado: reproduciendo vídeo');
-        vid.play().catch(e => console.warn('Play bloqueado:', e));
-      });
-      marker.addEventListener('markerLost', () => {
-        console.log('Marcador perdido: pausando vídeo');
-        vid.pause();
-      });
-    };
-  </script>
+  // dispara la petición GET /assets/video.mp4
+  vid.load();
+
+  marker.addEventListener('markerFound', () => {
+    console.log('%c✔ Patrón detectado → play vídeo','color:lime');
+    vid.play().catch(err => console.warn('play() bloqueado:', err));
+  });
+
+  marker.addEventListener('markerLost', () => {
+    console.log('%c✖ Patrón perdido → pause','color:orange');
+    vid.pause();
+  });
+};
+</script>
 
 </body>
 </html>
