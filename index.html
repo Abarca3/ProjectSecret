@@ -1,69 +1,83 @@
 <!DOCTYPE html>
 <html lang="es">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Tarjeta AR Video</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Tarjeta AR Video</title>
 
-    <!-- A-Frame -->
-    <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
-    <!-- AR.js for A-Frame -->
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <!-- A-Frame -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
+  <!-- AR.js for A-Frame -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
 
-    <style>
-      body { margin: 0; overflow: hidden; }
-      /* Ocultamos el elemento <video> nativo */
-      video { display: none; }
-    </style>
-  </head>
-  <body>
-    <a-scene
-      embedded
-      vr-mode-ui="enabled: false"
-      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+  <style>
+    html, body {
+      margin: 0; padding: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+    }
+    /* Hacemos que la escena cubra todo el viewport */
+    a-scene {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+    }
+    /* Solo ocultamos nuestro vídeo de assets, no el feed de la cámara */
+    video#myVideo {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <a-scene
+    embedded
+    vr-mode-ui="enabled: false"
+    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+  >
+    <!-- Pre-cargamos el vídeo -->
+    <a-assets>
+      <video
+        id="myVideo"
+        src="assets/video.mp4"
+        preload="auto"
+        loop
+        autoplay
+        muted
+        playsinline
+        webkit-playsinline
+        crossorigin="anonymous"
+      ></video>
+    </a-assets>
+
+    <!-- Definimos el marcador .patt -->
+    <a-marker
+      type="pattern"
+      url="assets/tu-marcador.patt"
+      smooth="true"
+      smoothCount="10"
+      smoothTolerance="0.01"
+      smoothThreshold="5"
     >
-      <!-- Pre-cargamos el vídeo -->
-      <a-assets>
-        <video
-          id="myVideo"
-          src="assets/video.mp4"
-          preload="auto"
-          loop
-          autoplay
-          muted
-          playsinline
-          webkit-playsinline
-          crossorigin="anonymous"
-        ></video>
-      </a-assets>
+      <!-- Plano que proyecta el vídeo -->
+      <a-video
+        src="#myVideo"
+        width="1"
+        height="0.56"
+        position="0 0 0"
+        rotation="-90 0 0"
+        autoplay="true"
+        loop="true"
+        playsinline
+        webkit-playsinline
+        muted
+      ></a-video>
+    </a-marker>
 
-      <!-- Definimos el marcador .patt -->
-      <a-marker
-        type="pattern"
-        url="assets/tu-marcador.patt"
-        smooth="true"
-        smoothCount="10"
-        smoothTolerance="0.01"
-        smoothThreshold="5"
-      >
-        <!-- Plano que proyecta el vídeo -->
-        <a-video
-          src="#myVideo"
-          width="1"
-          height="0.56"
-          position="0 0 0"
-          rotation="-90 0 0"
-          autoplay="true"
-          loop="true"
-          playsinline
-          webkit-playsinline
-          muted
-        ></a-video>
-      </a-marker>
+    <!-- Cámara para AR.js -->
+    <a-entity camera></a-entity>
+  </a-scene>
 
-      <!-- Cámara para AR.js -->
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+</body>
 </html>
