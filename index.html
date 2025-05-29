@@ -2,9 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Tarjeta AR Video</title>
 
+  <!-- A-Frame + AR.js -->
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
   <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
@@ -19,7 +21,7 @@
       top: 0; left: 0;
       width: 100%; height: 100%;
     }
-    /* Ocultamos el elemento de vídeo original de los assets */
+    /* Ocultamos solo el elemento <video> de assets */
     video#myVideoAsset {
       display: none;
     }
@@ -31,72 +33,69 @@
     embedded
     vr-mode-ui="enabled: false"
     arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-    >
+  >
+    <!-- 1) Pre-carga forzada del vídeo -->
     <a-assets>
       <video
-        id="myVideoAsset" src="assets/video.mp4" preload="auto"
+        id="myVideoAsset"
+        src="assets/video.mp4"
+        autoplay          <!-- inicia descarga automática -->
+        preload="auto"
         loop
-        muted      playsinline
+        muted
+        playsinline
         webkit-playsinline
         crossorigin="anonymous"
-        ></video>
+      ></video>
     </a-assets>
 
+    <!-- 2) Definimos el marcador .patt -->
     <a-marker
-      id="myMarker" type="pattern"
-      url="assets/tu-marcador.patt" smooth="true"
+      id="myMarker"
+      type="pattern"
+      url="assets/tu-marcador.patt"
+      smooth="true"
       smoothCount="10"
       smoothTolerance="0.01"
       smoothThreshold="5"
     >
+      <!-- 3) Plano A-Frame que proyecta el vídeo -->
       <a-video
         id="markerVideo"
         src="#myVideoAsset"
-        width="1.6" height="0.9"
+        width="1.6"
+        height="0.9"
         position="0 0 0"
         rotation="-90 0 0"
-        ></a-video>
+        autoplay
+        loop
+        muted
+        playsinline
+        webkit-playsinline
+      ></a-video>
+    </a-marker>
 
-      </a-marker>
-
+    <!-- 4) Cámara para AR.js -->
     <a-entity camera></a-entity>
   </a-scene>
-<script>
-  window.onload = () => {
-    const videoAsset = document.querySelector("#myVideoAsset");
-    if (videoAsset) {
-      videoAsset.load();   // <- esto fuerza la petición al servidor
-    }
-    // …el resto de tu setup markerFound/markerLost…
-  };
-</script>
+
   <script>
     window.onload = () => {
-      const marker = document.querySelector("#myMarker");
-      const videoAsset = document.querySelector("#myVideoAsset"); // El elemento <video> en <a-assets>
+      // Forzamos la carga del asset de vídeo en cuanto abra la página
+      const vid = document.getElementById('myVideoAsset');
+      if (vid) vid.load();
 
-      if (!marker) {
-        console.error("El marcador #myMarker no se encontró en el DOM.");
-        return;
-      }
-      if (!videoAsset) {
-        console.error("El asset de vídeo #myVideoAsset no se encontró en el DOM.");
-        return;
-      }
+      // Configuramos play/pause al detectar el marcador
+      const marker = document.getElementById('myMarker');
+      if (!marker || !vid) return;
 
       marker.addEventListener('markerFound', () => {
-        console.log('Marcador Encontrado!');
-        videoAsset.play().catch(error => {
-          // Este catch es importante si el navegador bloquea el play()
-          console.error("Error al intentar reproducir el vídeo:", error);
-        });
+        console.log('Marcador encontrado: reproduciendo vídeo');
+        vid.play().catch(e => console.warn('Play bloqueado:', e));
       });
-
       marker.addEventListener('markerLost', () => {
-        console.log('Marcador Perdido');
-        videoAsset.pause();
-        // Opcional: rebobinar el vídeo cuando el marcador se pierde
-        // videoAsset.currentTime = 0;
+        console.log('Marcador perdido: pausando vídeo');
+        vid.pause();
       });
     };
   </script>
