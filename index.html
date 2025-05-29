@@ -2,14 +2,11 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport"
-        content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Tarjeta AR Video</title>
 
-  <!-- A-Frame -->
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
-  <!-- AR.js for A-Frame -->
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
   <style>
     html, body {
@@ -17,14 +14,13 @@
       width: 100%; height: 100%;
       overflow: hidden;
     }
-    /* Hacemos que la escena cubra todo el viewport */
     a-scene {
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
     }
-    /* Solo ocultamos nuestro vídeo de assets, no el feed de la cámara */
-    video#myVideo {
+    /* Ocultamos el elemento de vídeo original de los assets */
+    video#myVideoAsset {
       display: none;
     }
   </style>
@@ -35,49 +31,67 @@
     embedded
     vr-mode-ui="enabled: false"
     arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-  >
-    <!-- Pre-cargamos el vídeo -->
+    >
     <a-assets>
       <video
-        id="myVideo"
-        src="assets/video.mp4"
-        preload="auto"
+        id="myVideoAsset" src="assets/video.mp4" preload="auto"
         loop
-        autoplay
-        muted
-        playsinline
+        muted      playsinline
         webkit-playsinline
         crossorigin="anonymous"
-      ></video>
+        ></video>
     </a-assets>
 
-    <!-- Definimos el marcador .patt -->
     <a-marker
-      type="pattern"
-      url="assets/tu-marcador.patt"
-      smooth="true"
+      id="myMarker" type="pattern"
+      url="assets/tu-marcador.patt" smooth="true"
       smoothCount="10"
       smoothTolerance="0.01"
       smoothThreshold="5"
     >
-      <!-- Plano que proyecta el vídeo -->
       <a-video
-        src="#myVideo"
-        width="1"
-        height="0.56"
+        id="markerVideo"
+        src="#myVideoAsset"
+        width="1.6" height="0.9"
         position="0 0 0"
         rotation="-90 0 0"
-        autoplay="true"
-        loop="true"
-        playsinline
-        webkit-playsinline
-        muted
-      ></a-video>
-    </a-marker>
+        ></a-video>
 
-    <!-- Cámara para AR.js -->
+      </a-marker>
+
     <a-entity camera></a-entity>
   </a-scene>
+
+  <script>
+    window.onload = () => {
+      const marker = document.querySelector("#myMarker");
+      const videoAsset = document.querySelector("#myVideoAsset"); // El elemento <video> en <a-assets>
+
+      if (!marker) {
+        console.error("El marcador #myMarker no se encontró en el DOM.");
+        return;
+      }
+      if (!videoAsset) {
+        console.error("El asset de vídeo #myVideoAsset no se encontró en el DOM.");
+        return;
+      }
+
+      marker.addEventListener('markerFound', () => {
+        console.log('Marcador Encontrado!');
+        videoAsset.play().catch(error => {
+          // Este catch es importante si el navegador bloquea el play()
+          console.error("Error al intentar reproducir el vídeo:", error);
+        });
+      });
+
+      marker.addEventListener('markerLost', () => {
+        console.log('Marcador Perdido');
+        videoAsset.pause();
+        // Opcional: rebobinar el vídeo cuando el marcador se pierde
+        // videoAsset.currentTime = 0;
+      });
+    };
+  </script>
 
 </body>
 </html>
