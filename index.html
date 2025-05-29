@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"/>
   <title>WebAR con MindAR + Vídeo</title>
 
   <!-- A-Frame + MindAR -->
@@ -10,30 +10,26 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.1.4/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    body { margin: 0; overflow: hidden; }
+    body { margin:0; overflow:hidden; }
     #startButton {
-      position: absolute;
-      top: 50%; left: 50%;
-      transform: translate(-50%, -50%);
-      background: #4CC3D9;
-      border: none;
-      padding: 1em 2em;
-      color: white;
-      font-size: 1.2em;
-      border-radius: .5em;
-      cursor: pointer;
-      z-index: 10;
+      position:absolute;
+      top:50%; left:50%;
+      transform:translate(-50%,-50%);
+      background:#4CC3D9; border:none;
+      padding:1em 2em; color:#fff;
+      font-size:1.2em; border-radius:.5em;
+      cursor:pointer; z-index:10;
     }
   </style>
 </head>
 <body>
 
-  <!-- Botón de inicio -->
+  <!-- botón de inicio -->
   <button id="startButton">Comenzar AR</button>
 
-  <!-- Escena AR -->
+  <!-- escena MindAR con autoStart desactivado -->
   <a-scene
-    mindar-image="imageTargetSrc: assets/target.mind; maxTrack: 1;"
+    mindar-image="imageTargetSrc: assets/target.mind; maxTrack: 1; autoStart: false;"
     embedded
     color-space="sRGB"
     renderer="precision: medium"
@@ -41,16 +37,18 @@
   >
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- Cuando detecta el marker, muestra vídeo + cubo -->
     <a-entity mindar-image-target="targetIndex: 0">
       <a-video
+        id="arVideo"
         src="#vid"
-        width="1.5" height="0.85"
+        width="1.5"
+        height="0.85"
         position="0 0 0"
         rotation="-90 0 0"
-        autoplay="true" loop="true"
+        loop
+        playsinline webkit-playsinline muted
       ></a-video>
-      <!-- cubo opcional para debugging -->
+      <!-- cubo de prueba -->
       <a-box
         position="0 0.5 0"
         rotation="0 45 0"
@@ -59,43 +57,36 @@
       ></a-box>
     </a-entity>
 
-    <!-- Assets: vídeo + preview de marker -->
     <a-assets>
       <video
         id="vid"
         src="assets/myvideo.mp4"
         preload="auto"
         crossorigin="anonymous"
-        playsinline
-        webkit-playsinline
+        playsinline webkit-playsinline
         muted
       ></video>
-      <img id="marker" src="assets/marker.png" />
+      <img id="marker" src="assets/marker.png"/>
     </a-assets>
   </a-scene>
 
   <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const startButton = document.getElementById("startButton");
-    const sceneEl     = document.querySelector("a-scene");
-    // Esperamos a que la escena haya cargado MindAR
-    sceneEl.addEventListener("renderstart", () => {
-      const mindarComp = sceneEl.components["mindar-image"];
-      startButton.addEventListener("click", async () => {
-        // forzamos play del vídeo (user gesture)
-        const vid = document.getElementById("vid");
-        try {
-          await vid.play();
-        } catch(e) {
-          console.warn("No se pudo reproducir el vídeo automáticamente", e);
-        }
-        // arrancamos MindAR (cámara + tracking)
+    document.addEventListener('DOMContentLoaded', () => {
+      const startButton = document.getElementById('startButton');
+      const sceneEl     = document.querySelector('a-scene');
+      // recuperamos el componente (no el system)
+      const mindarComp  = sceneEl.components['mindar-image'];
+
+      startButton.addEventListener('click', async () => {
+        // 1) forzamos play del vídeo (gesture-required)
+        const vid = document.getElementById('vid');
+        try { await vid.play(); } catch(e) { console.warn(e); }
+        // 2) arrancamos cámara y tracking
         await mindarComp.start();
-        // ocultamos el botón
-        startButton.style.display = "none";
+        // 3) ocultamos el botón
+        startButton.style.display = 'none';
       });
     });
-  });
   </script>
 
 </body>
