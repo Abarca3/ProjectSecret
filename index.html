@@ -61,7 +61,15 @@
 
     <a-entity camera></a-entity>
   </a-scene>
-
+<script>
+  window.onload = () => {
+    const videoAsset = document.querySelector("#myVideoAsset");
+    if (videoAsset) {
+      videoAsset.load();   // <- esto fuerza la petición al servidor
+    }
+    // …el resto de tu setup markerFound/markerLost…
+  };
+</script>
   <script>
     window.onload = () => {
       const marker = document.querySelector("#myMarker");
