@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-  <title>WebAR Demo Completo</title>
+  <title>WebAR con MindAR + Vídeo</title>
 
   <!-- A-Frame + MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
@@ -28,10 +28,10 @@
 </head>
 <body>
 
-  <!-- BOTÓN de inicio (necesario en móvil) -->
+  <!-- Botón de inicio -->
   <button id="startButton">Comenzar AR</button>
 
-  <!-- ESCENA AR -->
+  <!-- Escena AR -->
   <a-scene
     mindar-image="imageTargetSrc: assets/target.mind; maxTrack: 1;"
     embedded
@@ -39,52 +39,63 @@
     renderer="precision: medium"
     vr-mode-ui="enabled: false"
   >
-    <!-- Cámara AR -->
     <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-    <!-- Target #0: al reconocerlo aparece el vídeo y el cubo de prueba -->
+    <!-- Cuando detecta el marker, muestra vídeo + cubo -->
     <a-entity mindar-image-target="targetIndex: 0">
-
-      <!-- Vídeo sobre plano -->
       <a-video
         src="#vid"
-        width="1.5"
-        height="0.85"
+        width="1.5" height="0.85"
         position="0 0 0"
         rotation="-90 0 0"
-        autoplay="true"
-        loop="true"
+        autoplay="true" loop="true"
       ></a-video>
-
-      <!-- CUBO de prueba (opcional) -->
+      <!-- cubo opcional para debugging -->
       <a-box
         position="0 0.5 0"
         rotation="0 45 0"
         depth="0.5" height="0.5" width="0.5"
-        material="color: #FFC65D; opacity: 0.8;"
+        material="color: #FFC65D; opacity: 0.6"
       ></a-box>
-
     </a-entity>
 
-    <!-- Assets: vídeo y marker preview -->
+    <!-- Assets: vídeo + preview de marker -->
     <a-assets>
-      <video id="vid" src="assets/myvideo.mp4" preload="auto" crossorigin="anonymous"></video>
+      <video
+        id="vid"
+        src="assets/myvideo.mp4"
+        preload="auto"
+        crossorigin="anonymous"
+        playsinline
+        webkit-playsinline
+        muted
+      ></video>
       <img id="marker" src="assets/marker.png" />
     </a-assets>
   </a-scene>
 
-  <!-- Script para arrancar MindAR tras el click -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const startButton = document.querySelector("#startButton");
-      const sceneEl = document.querySelector("a-scene");
-      const mindarComponent = sceneEl.components["mindar-image"];
-
+  document.addEventListener("DOMContentLoaded", () => {
+    const startButton = document.getElementById("startButton");
+    const sceneEl     = document.querySelector("a-scene");
+    // Esperamos a que la escena haya cargado MindAR
+    sceneEl.addEventListener("renderstart", () => {
+      const mindarComp = sceneEl.components["mindar-image"];
       startButton.addEventListener("click", async () => {
-        await mindarComponent.start();      // inicia el tracking y cámara
-        startButton.style.display = "none";  // oculta el botón
+        // forzamos play del vídeo (user gesture)
+        const vid = document.getElementById("vid");
+        try {
+          await vid.play();
+        } catch(e) {
+          console.warn("No se pudo reproducir el vídeo automáticamente", e);
+        }
+        // arrancamos MindAR (cámara + tracking)
+        await mindarComp.start();
+        // ocultamos el botón
+        startButton.style.display = "none";
       });
     });
+  });
   </script>
 
 </body>
