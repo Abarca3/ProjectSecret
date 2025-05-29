@@ -78,26 +78,41 @@
     <!-- 4) Cámara para AR.js -->
     <a-entity camera></a-entity>
   </a-scene>
-
+<script>
+  window.onload = () => {
+    const videoAsset = document.querySelector("#myVideoAsset");
+    if (videoAsset) {
+      videoAsset.load();   // <- esto fuerza la petición al servidor
+    }
+    // …el resto de tu setup markerFound/markerLost…
+  };
+</script>
   <script>
     window.onload = () => {
-      // Forzamos la carga del asset de vídeo en cuanto abra la página
-      const vid = document.getElementById('myVideoAsset');
-      if (vid) vid.load();
+      const marker = document.querySelector("#myMarker");
+      const videoAsset = document.querySelector("#myVideoAsset"); // El elemento <video> en <a-assets>
 
-      // Configuramos play/pause al detectar el marcador
-      const marker = document.getElementById('myMarker');
-      if (!marker || !vid) return;
+      if (!marker) {
+        console.error("El marcador #myMarker no se encontró en el DOM.");
+        return;
+      }
+      if (!videoAsset) {
+        console.error("El asset de vídeo #myVideoAsset no se encontró en el DOM.");
+        return;
+      }
 
       marker.addEventListener('markerFound', () => {
-        console.log('Marcador encontrado: reproduciendo vídeo');
-        vid.play().catch(e => console.warn('Play bloqueado:', e));
+        console.log('Marcador Encontrado!');
+        videoAsset.play().catch(error => {
+          // Este catch es importante si el navegador bloquea el play()
+          console.error("Error al intentar reproducir el vídeo:", error);
+        });
       });
       marker.addEventListener('markerLost', () => {
         console.log('Marcador perdido: pausando vídeo');
         vid.pause();
       });
-    };
+    });
   </script>
 
 </body>
