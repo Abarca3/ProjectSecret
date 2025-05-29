@@ -61,34 +61,28 @@
 
     <a-entity camera></a-entity>
   </a-scene>
-<script>
-  window.onload = () => {
-    const videoAsset = document.querySelector("#myVideoAsset");
-    if (videoAsset) {
-      videoAsset.load();   // <- esto fuerza la petición al servidor
-    }
-    // …el resto de tu setup markerFound/markerLost…
-  };
-</script>
   <script>
-    window.onload = () => {
-      const marker = document.querySelector("#myMarker");
-      const videoAsset = document.querySelector("#myVideoAsset"); // El elemento <video> en <a-assets>
+    window.addEventListener('load', () => {
+      const marker = document.querySelector('#myMarker');
+      const videoAsset = document.querySelector('#myVideoAsset');
 
       if (!marker) {
-        console.error("El marcador #myMarker no se encontró en el DOM.");
+        console.error('El marcador #myMarker no se encontró en el DOM.');
         return;
       }
       if (!videoAsset) {
-        console.error("El asset de vídeo #myVideoAsset no se encontró en el DOM.");
+        console.error('El asset de vídeo #myVideoAsset no se encontró en el DOM.');
         return;
       }
+
+      // Forzamos la carga para evitar demoras en la reproducción
+      videoAsset.load();
 
       marker.addEventListener('markerFound', () => {
         console.log('Marcador Encontrado!');
         videoAsset.play().catch(error => {
           // Este catch es importante si el navegador bloquea el play()
-          console.error("Error al intentar reproducir el vídeo:", error);
+          console.error('Error al intentar reproducir el vídeo:', error);
         });
       });
 
@@ -98,7 +92,7 @@
         // Opcional: rebobinar el vídeo cuando el marcador se pierde
         // videoAsset.currentTime = 0;
       });
-    };
+    });
   </script>
 
 </body>
