@@ -1,81 +1,24 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tarjeta AR con vídeo</title>
+  <head>
+    <meta charset="utf-8">
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>body{margin:0;overflow:hidden}</style>
+  </head>
+  <body>
+    <a-scene embedded arjs>
+      <!-- ① Pre-carga del modelo -->
+      <a-assets>
+        <a-asset-item id="trex" src="assets/trex/scene.gltf"></a-asset-item>
+      </a-assets>
 
-  <!-- A-Frame + AR.js -->
-  <script src="https://cdn.jsdelivr.net/npm/aframe@1.4.2/dist/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
+      <!-- ② Marcador Hiro -->
+      <a-marker preset="hiro">
+        <a-entity gltf-model="#trex" scale="0.05 0.05 0.05"></a-entity>
+      </a-marker>
 
-  <style>
-    html,body{margin:0;height:100%;overflow:hidden}
-    a-scene{position:absolute;top:0;left:0;width:100%;height:100%}
-    video#myVideoAsset{display:none}
-  </style>
-</head>
-<body>
-
-<a-scene
-  embedded
-  vr-mode-ui="enabled:false"
-  arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled:true;"
->
-  <!-- 1) Vídeo SIN autoplay -->
-  <a-assets>
-    <video id="myVideoAsset"
-           src="assets/video.mp4"
-           preload="auto"
-           loop
-           muted
-           playsinline
-           webkit-playsinline
-           crossorigin="anonymous">
-    </video>
-  </a-assets>
-
-  <!-- 2) Marcador patrón -->
-  <a-marker id="myMarker"
-            type="pattern"
-            url="assets/tu-marcador.patt"
-            smooth="true" smoothCount="10"
-            smoothTolerance="0.01" smoothThreshold="5">
-
-    <!-- 3) Plano con el vídeo; tampoco autoplay -->
-    <a-video src="#myVideoAsset"
-             width="1.6" height="0.9"
-             position="0 0 0"
-             rotation="-90 0 0"
-             loop
-             playsinline
-             webkit-playsinline
-             muted>
-    </a-video>
-  </a-marker>
-
-  <a-entity camera></a-entity>
-</a-scene>
-
-<script>
-window.onload = () => {
-  const marker = document.querySelector('#myMarker');
-  const vid    = document.querySelector('#myVideoAsset');
-
-  // dispara la petición GET /assets/video.mp4
-  vid.load();
-
-  marker.addEventListener('markerFound', () => {
-    console.log('%c✔ Patrón detectado → play vídeo','color:lime');
-    vid.play().catch(err => console.warn('play() bloqueado:', err));
-  });
-
-  marker.addEventListener('markerLost', () => {
-    console.log('%c✖ Patrón perdido → pause','color:orange');
-    vid.pause();
-  });
-};
-</script>
-
-</body>
+      <a-entity camera></a-entity>
+    </a-scene>
+  </body>
 </html>
